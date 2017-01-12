@@ -1,0 +1,11 @@
+---
+# vars file for hashicorp-vault
+
+vault_src: https://releases.hashicorp.com/vault/0.6.2/vault_0.6.2_linux_amd64.zip
+user_name: vault
+group_name: vault
+binary_path: /usr/local/bin/
+data_dir: /var/lib/vault
+cfg_path: /etc/vault.cfg
+service_name: Hashi Corp Vault
+service_start_params: 'server -config {{ cfg_path }}'

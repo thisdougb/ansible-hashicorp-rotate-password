@@ -1,0 +1,11 @@
+[Unit]
+Description={{ service_name }}
+
+[Service]
+User={{ user_name }}
+Group={{ group_name }}
+TimeoutStartSec=0
+ExecStart={{ binary_path }}/vault {{ service_start_params }}
+
+[Install]
+WantedBy=multi-user.target

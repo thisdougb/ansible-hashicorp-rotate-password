@@ -1,0 +1,15 @@
+---
+- hosts: all
+
+# install ssh key for ansible
+  tasks:
+
+    - name: install Ansible ssh key
+      authorized_key:
+        user: vagrant
+        key: "{{ lookup('file', '/home/vagrant/.ssh/id_rsa.pub') }}"
+
+    - name: copy /etc/hosts
+      copy:
+        src: /etc/hosts
+        dest: /etc/hosts

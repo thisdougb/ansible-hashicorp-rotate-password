@@ -1,0 +1,7 @@
+---
+- hosts: vault
+
+  roles:
+    - { role: hashivault, tags: ['hashivault'] }
+    - { role: hashivault-init, tags: ['hashivault-init'] }
+    - { role: hashivault-unseal, tags: ['hashivault-unseal'] }

@@ -1,0 +1,64 @@
+- name: stop vault
+  service:
+    name: vault
+    state: stopped
+
+- name: clear out vault
+  file:
+    path: /var/lib/vault
+    state: absent
+
+- name: recreate vault data dir
+  file:
+    path: /var/lib/vault
+    state: directory
+    owner: vault
+    group: vault
+    mode: 0755
+
+- name: start vault
+  service:
+    name: vault
+    state: started
+
+- set_fact:
+    vaulthost: "{{ inventory_hostname }}"
+
+- name: init vault
+  uri:
+    url: "http://{{ vaulthost }}:8200/v1/sys/init"
+    method: PUT
+    body: "{{ lookup('file','init_params.json') }}"
+    body_format: json
+    return_content: yes
+    status_code: 200
+  delegate_to: localhost
+  register: vault_init
+
+- name: save keys locally
+  copy:
+    content: "{{ vault_init.json }}"
+    dest: "{{ role_path }}/../.hashicorp_vault_keys.json"
+  delegate_to: localhost
+
+# for ease of use we setup the root env to make cli vault access work
+- name: set VAULT_ADDR environment var for root@vault
+  lineinfile:
+    dest: /root/.bashrc
+    line: 'export VAULT_ADDR=http://127.0.0.1:8200'
+
+- name: set VAULT_TOKEN environment var for root@vault
+  copy:
+    content: "{{ vault_init.json.root_token }}"
+    dest: /root/.vault-token
+    mode: 0600
+    owner: root
+    group: root
+
+- name: copy vault ldap auth scrip
+  copy:
+    src: ldapauthconfig.sh
+    dest: /root/
+    mode: 0755
+    owner: root
+    group: root

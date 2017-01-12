@@ -1,0 +1,43 @@
+dn: olcDatabase={0}config,cn=config
+replace: olcRootDN
+olcRootDN: cn=admin,cn=config
+
+dn: olcDatabase={0}config,cn=config
+replace: olcRootPW
+olcRootPW: password
+
+dn: olcDatabase={2}hdb,cn=config
+replace: olcSuffix
+olcSuffix: dc=example,dc=com
+
+dn: olcDatabase={2}hdb,cn=config
+replace: olcRootDN
+olcRootDN: cn=Manager,dc=example,dc=com
+
+dn: olcDatabase={2}hdb,cn=config
+replace: olcRootPW
+olcRootPW: password
+
+#dn: cn=config
+#replace: olcTLSCACertificateFile
+#olcTLSCACertificateFile: /usr/var/openldap-data/cacert.pem
+
+#dn: cn=config
+#replace: olcTLSCertificateFile
+#olcTLSCertificateFile: /usr/var/openldap-data/servercert.pem
+
+#dn: cn=config
+#replace: olcTLSCertificateKeyFile
+#olcTLSCertificateKeyFile: /usr/var/openldap-data/serverkey.pem
+
+#dn: cn=config
+#replace: olcTLSCipherSuite
+#olcTLSCipherSuite: ALL
+
+#dn: cn=config
+#replace: olcTLSVerifyClient
+#olcTLSVerifyClient: hard
+
+dn: cn=config
+replace: olcLogLevel
+olcLogLevel: 296

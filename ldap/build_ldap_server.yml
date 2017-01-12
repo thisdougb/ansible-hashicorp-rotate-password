@@ -1,0 +1,6 @@
+---
+- hosts: ldap
+
+  roles:
+    - { role: openldap, tags: ['openldap'] }
+    - { role: openldap-config, tags: ['openldap-config'] }

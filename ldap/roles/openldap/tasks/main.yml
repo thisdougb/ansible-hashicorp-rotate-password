@@ -1,0 +1,27 @@
+---
+# tasks file for openldap
+
+- name: install openldap package
+  yum:
+    name: openldap
+    state: present
+
+- name: install openldap-servers package
+  yum:
+    name: openldap-servers
+    state: present
+
+- name: install openldap-clients package
+  yum:
+    name: openldap-clients
+    state: present
+
+- name: logging
+  lineinfile:
+    dest: /etc/rsyslog.conf
+    line: 'local4.*                                                /var/log/slapd.log'
+
+- name: restart rsyslog
+  service:
+    name: rsyslog
+    state: restarted

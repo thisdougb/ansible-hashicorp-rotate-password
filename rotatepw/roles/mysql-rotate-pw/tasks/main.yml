@@ -1,0 +1,44 @@
+---
+- name: "Authenticate ({{ username }}) against HashiVault"
+  uri:
+    url: "http://vault:8200/v1/auth/ldap/login/{{ username }}"
+    method: POST
+    body_format: json
+    body: '{"password": "{{ password }}" }'
+    return_content: yes
+    status_code: 200
+  register: auth_request_content
+  delegate_to: localhost
+
+    # the vault_user_token is used for subsequent authentication to
+    # HashiVault, we set_fact here just to make for easier reading.
+- set_fact:
+    vault_user_token: "{{ auth_request_content.json.auth.client_token }}"
+
+- name: Read existing mysql password from the HashiVault
+  uri:
+    url: "http://vault:8200/v1/secret/prod/apps/communote/dbnode"
+    method: GET
+    HEADER_X-Vault-Token: "{{ vault_user_token }}"
+    return_content: yes
+    status_code: 200
+  register: vault_content
+  delegate_to: localhost
+
+- name: Generate new random password for mysql root user
+  shell: </dev/urandom tr -dc '1234567890qwertyuiopQWERTYUIOPasdfghjklASDFGHJKLzxcvbnmZXCVBNM' | head -c20; echo
+  register: rand_pw_string
+  delegate_to: localhost
+
+- name: Update mysql with the new root password
+  command: "mysql -u root -p{{ vault_content.json.data.mysqlrootpw }} -e \"ALTER USER 'root'@'localhost' IDENTIFIED BY '{{ rand_pw_string.stdout }}'\""
+
+- name: Store the new root password back into HashiVault
+  uri:
+    url: "http://vault:8200/v1/secret/prod/apps/communote/dbnode"
+    method: POST
+    HEADER_X-Vault-Token: "{{ vault_user_token }}"
+    body_format: json
+    body: '{ "mysqlrootpw": "{{ rand_pw_string.stdout }}" }'
+    status_code: 204
+  delegate_to: localhost

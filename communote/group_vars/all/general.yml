@@ -1,0 +1,2 @@
+hashivault_url: vault:8200/v1/secret
+hashivault_secret_path: /prod/apps/communote/dbnode

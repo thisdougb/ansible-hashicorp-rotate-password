@@ -1,0 +1,63 @@
+---
+- name: copy mysql repo rpm to host
+  copy:
+    src: mysql57-community-release-el7-9.noarch.rpm
+    dest: /tmp/mysql57-community-release-el7-9.noarch.rpm
+    force: no
+
+- name: install mysql repo rpm
+  yum:
+    name: /tmp/mysql57-community-release-el7-9.noarch.rpm
+    state: present
+
+- name: install mysql rpms
+  yum:
+    name: mysql-community-server
+    state: present
+  register: mysqlrpminstall
+
+- block:
+
+  - name: initialize mysql without a root password
+    command: mysqld --initialize-insecure --user=mysql
+
+  - name: install /etc/my.cnf
+    copy:
+      src: my.cnf
+      dest: /etc/my.cnf
+
+  - name: start mysqld
+    service:
+      name: mysqld
+      state: started
+      enabled: true
+
+  - name: generate random string
+    shell: </dev/urandom tr -dc '1234567890qwertyuiopQWERTYUIOPasdfghjklASDFGHJKLzxcvbnmZXCVBNM' | head -c20; echo
+    register: rand_pw_string
+    delegate_to: localhost
+
+# TODO: move these two tasks outside and into a block which detects if the db is already initialised with a root pw
+  - name: write mysql secret to vault
+    uri:
+      url: "http://{{ hashivault_url }}{{ hashivault_secret_path }}"
+      method: POST
+      HEADER_X-Vault-Token: "{{ hashivault_root_token }}"
+      body_format: json
+      body: '{ "mysqlrootpw": "{{ rand_pw_string.stdout }}" }'
+      status_code: 204
+    delegate_to: localhost
+
+  - name: set initial mysql root password
+    shell: "mysql -u root -e \"ALTER USER 'root'@'localhost' IDENTIFIED BY '{{ rand_pw_string.stdout }}'\""
+
+  # NOTE: this is an optional, it's more secure (than cli passwords) but Security bods tend to not like it.
+  - name: install the root password locally, so we don't have to pass it as a cli arg
+    template:
+      src: my.cnf.j2
+      dest: /root/.my.cnf
+      mode: 600
+      owner: root
+      group: root
+
+  when: mysqlrpminstall.changed

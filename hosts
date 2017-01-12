@@ -1,0 +1,8 @@
+[ldap]
+ldapserver
+
+[vault]
+vault
+
+[database]
+dbnode

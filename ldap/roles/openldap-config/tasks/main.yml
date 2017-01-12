@@ -1,0 +1,30 @@
+---
+# tasks file for openldap-config
+
+- name: enable slapd
+  service:
+    name: slapd
+    enabled: yes
+    state: started
+
+- name: copy base slapd config
+  copy:
+    src: base_ldap_config.ldif
+    dest: /tmp/base_ldap_config.ldif
+
+- name: import base slapd config
+  shell: /bin/ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f /tmp/base_ldap_config.ldif
+
+- name: import cosine.ldif schema
+  shell: /bin/ldapadd -x -D 'cn=admin,cn=config' -w password -f /etc/openldap/schema/cosine.ldif
+
+- name: import inetorgperson.ldif schema
+  shell: /bin/ldapadd -x -D 'cn=admin,cn=config' -w password -f /etc/openldap/schema/inetorgperson.ldif
+
+- name: copy ldap content
+  copy:
+    src: ldap_content.ldif
+    dest: /tmp/ldap_content.ldif
+
+- name: import ldap content
+  shell: /bin/ldapadd -x -D 'cn=Manager,dc=example,dc=com' -w password -f /tmp/ldap_content.ldif

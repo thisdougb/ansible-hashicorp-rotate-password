@@ -1,0 +1,14 @@
+---
+- hosts: dbnode
+
+  vars_prompt:
+    - name: "username"
+      prompt: "your AD login: "
+      private: no
+
+    - name: "password"
+      prompt: "password: "
+      private: yes
+
+  roles:
+    - { role: mysql-rotate-pw, tags: ['mysql-rotate-pw'] }

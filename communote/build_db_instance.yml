@@ -1,0 +1,5 @@
+---
+- hosts: dbnode
+
+  roles:
+    - { role: mysql-server, tags: ['mysql-server'] }

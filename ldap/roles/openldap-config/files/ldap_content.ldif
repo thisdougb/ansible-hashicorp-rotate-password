@@ -1,0 +1,56 @@
+dn: dc=example,dc=com
+objectclass: dcObject
+objectclass: organization
+o: Example Company
+dc: example
+
+dn: cn=Manager,dc=example,dc=com
+objectclass: organizationalRole
+cn: Manager
+
+# development structure
+dn: ou=development,dc=example,dc=com
+objectClass: organizationalUnit
+ou: development
+
+dn: ou=people,ou=development,dc=example,dc=com
+objectClass: organizationalUnit
+ou: people
+
+dn: ou=groups,ou=development,dc=example,dc=com
+objectClass: organizationalUnit
+ou: groups
+
+# Production people
+dn: cn=ian,ou=people,ou=development,dc=example,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: ian
+givenName: Ian
+sn: Hibell
+userPassword: {SSHA}uBwPNhP6nQNNjDpM4uOWGoxUTHbpWZCX
+
+dn: cn=production,ou=groups,ou=development,dc=example,dc=com
+objectclass: top
+objectclass: groupOfNames
+member: cn=ian,ou=people,ou=development,dc=example,dc=com
+cn: production
+
+# Developer people
+dn: cn=dervla,ou=people,ou=development,dc=example,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: dervla
+givenName: Dervla
+sn: Murphy
+userPassword: {SSHA}uBwPNhP6nQNNjDpM4uOWGoxUTHbpWZCX
+
+dn: cn=developer,ou=groups,ou=development,dc=example,dc=com
+objectclass: top
+objectclass: groupOfNames
+member: cn=dervla,ou=people,ou=development,dc=example,dc=com
+cn: developer

@@ -1,0 +1,56 @@
+---
+# tasks file for hashivault
+
+- name: "create {{ group_name }} group"
+  group:
+    name: "{{ group_name }}"
+    state: present
+
+- name: "create {{ user_name }} user"
+  user:
+    name: "{{ user_name }}"
+    group: "{{ group_name }}"
+    comment: "{{ service_name }}"
+    shell: /bin/shell
+    state: present
+
+- name: "create {{ data_dir }} directory"
+  file:
+    path: "{{ data_dir }}"
+    owner: "{{ user_name }}"
+    group: "{{ group_name }}"
+    mode: 0755
+    state: directory
+
+- name: "download binary"
+  unarchive:
+    src: "{{ vault_src }}"
+    remote_src: true
+    dest: "{{ binary_path }}"
+    owner: "{{ user_name }}"
+    group: "{{ group_name }}"
+    mode: 0755
+    keep_newer: true
+
+- name: "install {{ cfg_path }}"
+  template:
+    src: vault.cfg.j2
+    dest: "{{ cfg_path }}"
+    owner: "{{ user_name }}"
+    group: "{{ group_name }}"
+    mode: 0644
+
+- name: install vault.service
+  template:
+    src: vault.service.j2
+    dest: "/etc/systemd/system/vault.service"
+    owner: root
+    group: root
+    mode: 0664
+    force: no
+
+- name: "start vault as a service"
+  service:
+    name: vault
+    state: started
+    enabled: yes
